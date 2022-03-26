@@ -113,6 +113,11 @@ View(iris)
 names(iris)
 dim(iris)
 
+#data값 비우기
+Orange$age[c(10, 15, 20)] <- NA
+#NA값 제외하고 평균값 구하기 > 다른 함수에도 적용가능 (var, sd)
+mean(Orange$age, na.rm = T)
+
 ##############################################################################
 
 #library dplyr 활용, subset 제작과 기본함수 작성
@@ -187,8 +192,14 @@ cbind(a,b) #열 추가, 열방향 결합
 rbind(a,b) #에러, math1과 math2가 다르기때문에 합쳐지지 않는다.
 
 split(iris, iris$Species) 
-#Speciesr 값의 종류에 따른 데이터 분리!!
+#Species 값의 종류에 따른 데이터 분리
 split(Orange, Orange$Tree) 
+Orange_Tree <- split(Orange, Orange$Tree)
+Orange_Tree$'3'$circumference #이렇게 쪼개서 접근 가능
+
+mean(Orange_Tree$'3'$circumference) #따로따로 평균 구하기
+mean(Orange_Tree$'1'$circumference)
+
 #TREE 값의 종류에 따라서 데이터들을 다 분리해준다
 margin.table(Titanic, margin = 1)
 margin.table(Titanic, margin = 2)
@@ -527,6 +538,16 @@ ggplot(mpg, aes(x= drv, y= hwy))+
 ggplot(mpg, aes(x= trans, y = hwy))+
   geom_boxplot(fill = "orange")+
   ggtitle("Hwy by Trans")
+
+#group 변수의 활용 - group별로 그래프가 묶여서 출력된다
+#gear별로 그래프를 따로 표현하고 싶을떄, fill도 범례로 활용하면 적절하다.
+ggplot(mtcars, aes(gear, mpg, group = gear, fill = gear))+
+  geom_boxplot() 
+#Tree별로 그래프를 따로 표현하고 싶을떄, 이 경우 position을 적절하게 바꿔줄 필요가 있다.
+ggplot(Orange, aes(age, circumference, group = Tree, fill = Tree))+
+  geom_bar(stat= "identity",
+           position = "dodge",
+           width = 100)
 
 # 축 눈금 변경 : scale_x_continuous() 함수의 breaks 및 labels 옵션
 # breaks 옵션은 축 눈금의 위치와 값을 조정하고, 
