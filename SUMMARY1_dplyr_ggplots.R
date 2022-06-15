@@ -113,11 +113,6 @@ View(iris)
 names(iris)
 dim(iris)
 
-#data값 비우기
-Orange$age[c(10, 15, 20)] <- NA
-#NA값 제외하고 평균값 구하기 > 다른 함수에도 적용가능 (var, sd)
-mean(Orange$age, na.rm = T)
-
 ##############################################################################
 
 #library dplyr 활용, subset 제작과 기본함수 작성
@@ -192,14 +187,8 @@ cbind(a,b) #열 추가, 열방향 결합
 rbind(a,b) #에러, math1과 math2가 다르기때문에 합쳐지지 않는다.
 
 split(iris, iris$Species) 
-#Species 값의 종류에 따른 데이터 분리
+#Speciesr 값의 종류에 따른 데이터 분리!!
 split(Orange, Orange$Tree) 
-Orange_Tree <- split(Orange, Orange$Tree)
-Orange_Tree$'3'$circumference #이렇게 쪼개서 접근 가능
-
-mean(Orange_Tree$'3'$circumference) #따로따로 평균 구하기
-mean(Orange_Tree$'1'$circumference)
-
 #TREE 값의 종류에 따라서 데이터들을 다 분리해준다
 margin.table(Titanic, margin = 1)
 margin.table(Titanic, margin = 2)
@@ -539,16 +528,6 @@ ggplot(mpg, aes(x= trans, y = hwy))+
   geom_boxplot(fill = "orange")+
   ggtitle("Hwy by Trans")
 
-#group 변수의 활용 - group별로 그래프가 묶여서 출력된다
-#gear별로 그래프를 따로 표현하고 싶을떄, fill도 범례로 활용하면 적절하다.
-ggplot(mtcars, aes(gear, mpg, group = gear, fill = gear))+
-  geom_boxplot() 
-#Tree별로 그래프를 따로 표현하고 싶을떄, 이 경우 position을 적절하게 바꿔줄 필요가 있다.
-ggplot(Orange, aes(age, circumference, group = Tree, fill = Tree))+
-  geom_bar(stat= "identity",
-           position = "dodge",
-           width = 100)
-
 # 축 눈금 변경 : scale_x_continuous() 함수의 breaks 및 labels 옵션
 # breaks 옵션은 축 눈금의 위치와 값을 조정하고, 
 # labels 옵션은 각각의 눈금에 해당하는 문자명을 조정한다.
@@ -658,9 +637,108 @@ ggplot(Orange, aes(age, circumference, color = Tree)) +
             show.legend = T)+
   scale_color_brewer(palette("Accent"))
 
+#############################################################################3
+#Treemap
+install.packages("treemap")
+library(treemap)
+data(GNI2014)
+View(GNI2014)
+treemap(GNI2014,
+        index = c("continent", "iso3"), #continent, iso를 index로
+        vSize = "population", #크기 결정 : 인구수
+        vColor = "GNI", #색의 진하기 : GNI로 결정
+        type = "value",
+        bg.labels = "yellow") #두번쨰 index 뒤에 노란색 배경 추가*가시성
 
+state <- data.frame(state.x77)
+state <- data.frame(state, Name = rownames(state))  
+#이름 열 추가
+state$Name <- rownames(state)
+state
 
+treemap(state,
+        index = c("Name"),
+        vSize = "Area",
+        vColor = "Murder",
+        type = "value",
+        title = "the US murder and Area")
 
+#결손값, NA 제거 및 다루기
+y <- c(1,2,3,4,NA,5,NA,7)
 
+na.omit(y)
+y1 <- as.vector(na.omit(y))
+y1
 
-  
+mean(y, na.rm = T)
+var(y, na.rm = T)
+sd(y, na.rm = T)
+
+women
+women1 <- women
+women1[c(1,10,13),1] <- NA
+women1 
+
+is.na(women1) #is.na >주어진 데이터의 NA 있는곳에 T 반환
+women1[is.na(women1)] #접근가능
+
+colSums(is.na(women1)) #각 열에 있는 총 NA수
+rowSums(is.na(women1)) #각 행에 있는 총 NA수
+
+airquality
+dim(airquality)
+airq <- na.omit(airquality) #NA 값 가지고 있는 행 모두 삭제
+#NA를 중간값으로 대체하는 방법도 있다! 
+#통계에서 잘 사용하는 방법이다. 기억해두자
+View(airq)
+
+dim(airq)
+hist(airq$Ozone, col = "blue", 
+     xlab = "Ozone", 
+     main = "Ozone of each state")
+
+#Outlier값 제거. 이상치 제거
+
+iris
+hist(iris$Sepal.Width)
+boxplot(iris$Sepal.Width)
+
+median(iris$Sepal.Width)
+boxplot.stats(iris$Sepal.Width)
+#boxplot의 stat반환
+
+out.value <- boxplot.stats(iris$Sepal.Width)$out
+#%in% 연산자 : 
+k = 3
+a = c(1,2,3,4,5)
+a%in%k 
+a == k
+#하나만 비교할땐 둘다 같은걸 반환하지만
+iris$Sepal.Width == out.value
+#벡터값을 비교하면 오류가 나므로 %in%을 사용한다
+
+iris.new <- iris 
+iris.new$Sepal.Width[iris$Sepal.Width %in% out.value] <- NA
+#이상치 값을 NA로 치환
+dim(iris.new)
+complete.cases(iris.new)
+#NA가 아닌 행만 bool형태로 반환
+iris.new <- iris.new[complete.cases(iris.new), ]
+dim(iris.new) #개의 행 제거
+
+boxplot(iris.new$Sepal.Width) #이상치 제거
+hist(iris.new$Sepal.Width)
+
+mtcars
+boxplot(mtcars$wt)
+boxplot.stats(mtcars$wt)
+out.mtcars <- boxplot.stats(mtcars$wt)$out
+out.mtcars
+mtcars1 <- mtcars
+mtcars1$wt <- ifelse(mtcars1$wt >= 5.25, NA, mtcars1$wt) 
+#직접 법위 설정하여 제거
+dim(mtcars1)
+dim(mtcars)
+
+boxplot(mtcars1$wt)
+boxplot.stats(mtcars1$wt)
